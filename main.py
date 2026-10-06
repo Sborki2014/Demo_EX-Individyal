@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException
-from typing import Optional, List, Dict
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Path, Query, Body
+from typing import Optional, List, Dict, Annotated
+from pydantic import BaseModel, Field
 
 app = FastAPI()
 
@@ -10,8 +10,6 @@ class User(BaseModel):
     name: str
     age: int
 
-
-
 class Post(BaseModel):
     id: int
     title: str
@@ -19,11 +17,23 @@ class Post(BaseModel):
     author: User
 
 class PostCreate(BaseModel):
-    title: str
-    body: str
-    author_id: int
+    title: Annotated[
+        str, Field(..., title='Заголовок поста', min_length=2, max_length=35)
+    ]
+    body: Annotated[
+        str, Field(..., title='Описание поста')
+    ]
+    author_id: Annotated[
+        int, Field(..., title='ID автора', ge=1)
+    ]
 
-
+class UserCreate(BaseModel):
+    name: Annotated[
+        str, Field(..., title='Имя пользователя', min_length=2, max_length=20)
+    ]
+    age: Annotated[
+        int, Field(..., title='Возраст пользователя', ge=1, le=120)
+    ]
 
 users = [
     {'id': 1, 'name': 'Alex', 'age': 33},
@@ -37,15 +47,6 @@ posts = [
     {'id': 3, 'title': 'News 3', 'body': 'Text 3', 'author': users[2]},
 ]
 
-# @app.get('/items')
-# async def items() -> List[Post]:
-#     post_objects = []
-#     for post in posts:
-#         post_objects.append(Post(id=post['id'], title=post['title'], body=post['body']))
-#     return post_objects
-
-
-
 
 @app.get('/items')
 async def items() -> List[Post]:
@@ -53,7 +54,14 @@ async def items() -> List[Post]:
 
 
 @app.post('/items/add')
-async def add_item(post: PostCreate) -> Post:
+async def add_item(post: Annotated[
+    PostCreate,
+    Body(..., example={
+        'title': 'TitleName',
+        'body': 'BodyName',
+        'author': 'InfoAuthor)'
+    })
+]) -> Post:
     author = next((user for user in users if user['id'] == post.author_id), None ) # Функция next будет искать до первого совпадения
     if not author:
         raise HTTPException(status_code=404, detail='User not found')
@@ -65,8 +73,47 @@ async def add_item(post: PostCreate) -> Post:
 
     return Post(**new_post)
 
+
+@app.post('/user/add')
+async def user_add(user: Annotated[
+    UserCreate,
+    Body(..., example={
+        'name': 'UserName',
+        'age': 1
+    })
+    ]) -> User:
+
+    new_user_id = len(users) + 1
+    new_user = {'id': new_user_id, 'name': user.name, 'age': user.age}
+
+    users.append(new_user)
+    return User(**new_user)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.get('/items/{id}')
-async def items(id: int) -> Post:
+async def items(id: Annotated[int, Path(..., title='Здесь указывается id поста', ge=1)]) -> Post:
     for post in posts:
         if post['id'] == id:
             return Post(**post)
@@ -74,7 +121,10 @@ async def items(id: int) -> Post:
     raise HTTPException(status_code=404, detail='Post not found')
 
 @app.get('/search')  
-async def search(post_id: Optional[int] = None) -> Dict[str, Optional[Post]]:
+async def search(post_id: Annotated[
+    Optional[int],
+    Query(title='ID of post to search for', ge=1, le=50)
+]) -> Dict[str, Optional[Post]]:
     if post_id:
         for post in posts:
             if post['id'] == post_id:
