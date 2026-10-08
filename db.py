@@ -1,7 +1,7 @@
 import sqlite3
 
 def init_db():
-    conn = sqlite3.connect('conferences.db')
+    conn = sqlite3.connect('conferences.db', check_same_thread=False)
     cursor = conn.cursor()
     
     # Таблица пользователей
@@ -39,6 +39,19 @@ def init_db():
         
     conn.commit()
     conn.close()
+
+def get_db():
+    """
+    Отдаёт соединение с БД на время обработки запроса.
+    FastAPI сам закроет его после завершения.
+    """
+    conn = sqlite3.connect('conferences.db', check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+    finally:
+        conn.close()
+
 
 if __name__ == "__main__":
     init_db()
