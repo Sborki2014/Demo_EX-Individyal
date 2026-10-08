@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новая заявка</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header><a href="/requests">Мои заявки</a> | <a href="/logout">Выйти</a></header>
+    <main>
+        <h1>Создание заявки</h1>
+        <form method="post" action="/create_request">
+            <!-- Текстовое поле для названия помещения -->
+            <input type="text" name="room" placeholder="Название помещения" data-testid="req-room" required>
+            <!-- Поле для даты -->
+            <input type="text" name="date" placeholder="Дата начала (ДД.ММ.ГГГГ)" data-testid="req-date" required>
+            <!-- Выбор способа оплаты -->
+            <select name="payment" data-testid="req-payment">
+                <option value="очное">Очное посещение</option>
+                <option value="СБП">Перевод по СБП</option>
+            </select>
+            <button type="submit" data-testid="req-submit">Отправить</button>
+        </form>
+    </main>
+</body>
+</html>

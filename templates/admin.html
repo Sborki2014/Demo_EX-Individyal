@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header><a href="/logout">Выйти</a></header>
+    <main>
+        <h1>Все заявки</h1>
+        <table>
+            <thead>
+                <tr><th>ID</th><th>Помещение</th><th>Дата</th><th>Статус</th><th>Действие</th></tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr data-testid="admin-row">
+                    <td>{{ req.id }}</td>
+                    <td>{{ req.room_name }}</td>
+                    <td>{{ req.start_date }}</td>
+                    <td>{{ req.status }}</td>
+                    <td>
+                        <form method="post" action="/admin/update_status/{{ req.id }}">
+                            <select name="status" data-testid="admin-status">
+                                <option value="Новая" {% if req.status == 'Новая' %}selected{% endif %}>Новая</option>
+                                <option value="Мероприятие назначено" {% if req.status == 'Мероприятие назначено' %}selected{% endif %}>Мероприятие назначено</option>
+                                <option value="Завершено" {% if req.status == 'Завершено' %}selected{% endif %}>Завершено</option>
+                            </select>
+                            <button type="submit">Сменить</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

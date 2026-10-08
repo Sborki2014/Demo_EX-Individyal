@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заявки</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header><a href="/create_request">Создать заявку</a> | <a href="/logout">Выйти</a></header>
+    <main>
+        <h1>Мои заявки</h1>
+        <div data-testid="req-list">
+            {% for req in requests %}
+            <div class="request-card">
+                <p><strong>Помещение:</strong> {{ req.room_name }}</p>
+                <p><strong>Дата:</strong> {{ req.start_date }}</p>
+                <p><strong>Оплата:</strong> {{ req.payment_method }}</p>
+                <p><strong>Статус:</strong> {{ req.status }}</p>
+                
+                {% if req.status == 'Завершено' %}
+                    <form method="post" action="/add_review/{{ req.id }}">
+                        <textarea name="review" placeholder="Оставьте отзыв" data-testid="req-review"></textarea>
+                        <button type="submit">Отправить отзыв</button>
+                    </form>
+                {% endif %}
+                {% if req.review %}
+                    <p><em>Ваш отзыв: {{ req.review }}</em></p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>
