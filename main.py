@@ -17,7 +17,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 init_db()
 
 def get_db():
-    conn = sqlite3.connect('conferences.db')
+    conn = sqlite3.connect('conferences.db', check_same_thread=False)
     conn.row_factory = sqlite3.Row
     try:
         yield conn
@@ -34,7 +34,7 @@ async def index(request: Request):
 # --- РЕГИСТРАЦИЯ (Модуль 1.2) ---
 @app.get("/register", response_class=HTMLResponse)
 async def register_page(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+    return templates.TemplateResponse(request, "register.html")
 
 @app.post("/register")
 async def register_user(
@@ -53,12 +53,12 @@ async def register_user(
         db.commit()
         return RedirectResponse(url="/login", status_code=303)
     except sqlite3.IntegrityError:
-        return templates.TemplateResponse("register.html", {"request": request, "error": "Логин уже занят"})
+        return templates.TemplateResponse(request, "register.html", {"error": "Логин уже занят"})
 
 # --- АВТОРИЗАЦИЯ (Модуль 1.2) ---
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html")
 
 @app.post("/login")
 async def login_user(
@@ -78,14 +78,14 @@ async def login_user(
             request.session["is_admin"] = True
         return RedirectResponse(url="/requests", status_code=303)
     else:
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Неверный логин или пароль"})
+        return templates.TemplateResponse(request, "login.html", {"error": "Неверный логин или пароль"})
 
 # --- СОЗДАНИЕ ЗАЯВКИ (Модуль 1.3) ---
 @app.get("/create_request", response_class=HTMLResponse)
 async def create_request_page(request: Request):
     if "user_id" not in request.session:
         return RedirectResponse(url="/login", status_code=303)
-    return templates.TemplateResponse("create_request.html", {"request": request})
+    return templates.TemplateResponse(request, "create_request.html")
 
 @app.post("/create_request")
 async def create_request(
@@ -112,7 +112,7 @@ async def view_requests(request: Request, db: sqlite3.Connection = Depends(get_d
     
     cursor = db.cursor()
     user_requests = cursor.execute("SELECT * FROM requests WHERE user_id = ?", (request.session["user_id"],)).fetchall()
-    return templates.TemplateResponse("requests.html", {"request": request, "requests": user_requests})
+    return templates.TemplateResponse(request, "requests.html", {"requests": user_requests})
 
 # --- ОТЗЫВ (Модуль 1.3, 3.7) ---
 @app.post("/add_review/{req_id}")
@@ -134,7 +134,7 @@ async def admin_panel(request: Request, db: sqlite3.Connection = Depends(get_db)
     
     cursor = db.cursor()
     all_requests = cursor.execute("SELECT * FROM requests").fetchall()
-    return templates.TemplateResponse("admin.html", {"request": request, "requests": all_requests})
+    return templates.TemplateResponse(request, "admin.html", {"requests": all_requests})
 
 @app.post("/admin/update_status/{req_id}")
 async def update_status(req_id: int, status: str = Form(...), db: sqlite3.Connection = Depends(get_db)):
