@@ -8,7 +8,7 @@ def hash_password(password: str) -> str:
     """
     Превращает пароль в хеш.
     
-    Пример:
+    Пример:g
         >>> hash_password("Demo77")
         '$2b$12$K8xPq3...'
     """
