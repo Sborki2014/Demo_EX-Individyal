@@ -1,35 +1,61 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мои заявки</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <header><a href="/create_request">Создать заявку</a> | <a href="/logout">Выйти</a></header>
-    <main>
+{% extends "base.html" %}
+
+{% block title %}Мои заявки — Конференции.РФ{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="page-header">
         <h1>Мои заявки</h1>
-        <div data-testid="req-list">
+        <a href="/create_request" class="btn btn-primary btn-small">+ Новая заявка</a>
+    </div>
+
+    {% if requests %}
+        <div class="requests-grid" data-testid="req-list">
             {% for req in requests %}
-            <div class="request-card">
-                <p><strong>Помещение:</strong> {{ req.room_name }}</p>
-                <p><strong>Дата:</strong> {{ req.start_date }}</p>
-                <p><strong>Оплата:</strong> {{ req.payment_method }}</p>
-                <p><strong>Статус:</strong> {{ req.status }}</p>
-                
-                {% if req.status == 'Завершено' %}
-                    <form method="post" action="/add_review/{{ req.id }}">
-                        <textarea name="review" placeholder="Оставьте отзыв" data-testid="req-review"></textarea>
-                        <button type="submit">Отправить отзыв</button>
-                    </form>
-                {% endif %}
-                {% if req.review %}
-                    <p><em>Ваш отзыв: {{ req.review }}</em></p>
-                {% endif %}
-            </div>
+                <article class="request-card">
+                    <header class="request-header">
+                        <h3>{{ req.room_name }}</h3>
+                        <span class="status status-{{ req.status|replace(' ', '-')|lower }}">
+                            {{ req.status }}
+                        </span>
+                    </header>
+
+                    <dl class="request-details">
+                        <div>
+                            <dt>Дата начала:</dt>
+                            <dd>{{ req.start_date }}</dd>
+                        </div>
+                        <div>
+                            <dt>Оплата:</dt>
+                            <dd>{{ req.payment_method }}</dd>
+                        </div>
+                    </dl>
+
+                    {% if req.status == 'Завершено' %}
+                        {% if req.review %}
+                            <div class="review-block">
+                                <strong>Ваш отзыв:</strong>
+                                <p>{{ req.review }}</p>
+                            </div>
+                        {% else %}
+                            <form method="post" action="/add_review/{{ req.id }}" class="review-form">
+                                <textarea name="review"
+                                          placeholder="Поделитесь впечатлениями о мероприятии..."
+                                          data-testid="req-review" required></textarea>
+                                <button type="submit" class="btn btn-secondary btn-small">
+                                    Оставить отзыв
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </article>
             {% endfor %}
         </div>
-    </main>
-</body>
-</html>
+    {% else %}
+        <div class="empty-state">
+            <p>У вас пока нет заявок.</p>
+            <a href="/create_request" class="btn btn-primary">Создать первую заявку</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

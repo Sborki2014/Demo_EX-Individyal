@@ -4,9 +4,9 @@ from fastapi.templating import Jinja2Templates
 import sqlite3
 
 from db import get_db
+from security import hash_password, verify_password
 
 router = APIRouter()
-
 templates = Jinja2Templates(directory="templates")
 
 
@@ -27,9 +27,10 @@ async def register_user(
 ):
     cursor = db.cursor()
     try:
+        hashed = hash_password(password)
         cursor.execute(
             "INSERT INTO users (login, password, fullname, phone, email) VALUES (?, ?, ?, ?, ?)",
-            (login, password, fullname, phone, email)
+            (login, hashed, fullname, phone, email)
         )
         db.commit()
         return RedirectResponse(url="/login", status_code=303)
@@ -52,21 +53,22 @@ async def login_user(
     db: sqlite3.Connection = Depends(get_db)
 ):
     cursor = db.cursor()
+
     user = cursor.execute(
-        "SELECT * FROM users WHERE login = ? AND password = ?",
-        (login, password)
+        "SELECT * FROM users WHERE login = ?",
+        (login,)
     ).fetchone()
 
-    if user:
+    if user and verify_password(password, user["password"]):
         request.session["user_id"] = user["id"]
         request.session["login"] = user["login"]
-        if login == "Conf2027" and password == "Demo77":
+        if login == "Conf2027":
             request.session["is_admin"] = True
         return RedirectResponse(url="/requests", status_code=303)
-    else:
-        return templates.TemplateResponse(
-            request, "login.html", {"error": "Неверный логин или пароль"}
-        )
+
+    return templates.TemplateResponse(
+        request, "login.html", {"error": "Неверный логин или пароль"}
+    )
 
 
 @router.get("/logout")

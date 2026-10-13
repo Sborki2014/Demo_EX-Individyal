@@ -7,19 +7,14 @@ from db import init_db
 from routers import auth, requests, admin
 
 
-# Создаём приложение
 app = FastAPI()
 
-# Сессии (нужны для логина)
 app.add_middleware(SessionMiddleware, secret_key="super-secret-key")
 
-# Статика (CSS)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Инициализация БД
 init_db()
 
-# Подключаем роутеры
 app.include_router(auth.router)
 app.include_router(requests.router)
 app.include_router(admin.router)

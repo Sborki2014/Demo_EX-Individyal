@@ -1,40 +1,53 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ-панель</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <header><a href="/logout">Выйти</a></header>
-    <main>
-        <h1>Все заявки</h1>
-        <table>
-            <thead>
-                <tr><th>ID</th><th>Помещение</th><th>Дата</th><th>Статус</th><th>Действие</th></tr>
-            </thead>
-            <tbody>
-                {% for req in requests %}
-                <tr data-testid="admin-row">
-                    <td>{{ req.id }}</td>
-                    <td>{{ req.room_name }}</td>
-                    <td>{{ req.start_date }}</td>
-                    <td>{{ req.status }}</td>
-                    <td>
-                        <form method="post" action="/admin/update_status/{{ req.id }}">
-                            <select name="status" data-testid="admin-status">
-                                <option value="Новая" {% if req.status == 'Новая' %}selected{% endif %}>Новая</option>
-                                <option value="Мероприятие назначено" {% if req.status == 'Мероприятие назначено' %}selected{% endif %}>Мероприятие назначено</option>
-                                <option value="Завершено" {% if req.status == 'Завершено' %}selected{% endif %}>Завершено</option>
-                            </select>
-                            <button type="submit">Сменить</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </main>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Админ-панель — Конференции.РФ{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <h1>Панель администратора</h1>
+    <p class="subtitle">Управление всеми заявками портала</p>
+
+    {% if requests %}
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Пользователь</th>
+                        <th>Помещение</th>
+                        <th>Дата</th>
+                        <th>Оплата</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr data-testid="admin-row">
+                        <td>{{ req.id }}</td>
+                        <td>{{ req.user_id }}</td>
+                        <td>{{ req.room_name }}</td>
+                        <td>{{ req.start_date }}</td>
+                        <td>{{ req.payment_method }}</td>
+                        <td>
+                            <form method="post" action="/admin/update_status/{{ req.id }}"
+                                  class="status-form">
+                                <select name="status" data-testid="admin-status">
+                                    <option value="Новая" {% if req.status == 'Новая' %}selected{% endif %}>Новая</option>
+                                    <option value="Мероприятие назначено" {% if req.status == 'Мероприятие назначено' %}selected{% endif %}>Мероприятие назначено</option>
+                                    <option value="Завершено" {% if req.status == 'Завершено' %}selected{% endif %}>Завершено</option>
+                                </select>
+                                <button type="submit" class="btn btn-secondary btn-small">OK</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Заявок пока нет.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

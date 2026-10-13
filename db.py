@@ -1,4 +1,5 @@
 import sqlite3
+from security import hash_password
 
 def init_db():
     conn = sqlite3.connect('conferences.db', check_same_thread=False)
@@ -30,10 +31,12 @@ def init_db():
     )
     ''')
     
-    # Создаем админа
+    hashed = hash_password('Demo77')
     try:
-        cursor.execute("INSERT INTO users (login, password, fullname, phone, email) VALUES (?, ?, ?, ?, ?)",
-                       ('Conf2027', 'Demo77', 'Администратор', '8(999)999-99-99', 'admin@conf.ru'))
+        cursor.execute(
+            "INSERT INTO users (login, password, fullname, phone, email) VALUES (?, ?, ?, ?, ?)",
+            ('Conf2027', hashed, 'Администратор', '8(999)999-99-99', 'admin@conf.ru')
+        )
     except sqlite3.IntegrityError:
         pass
         
@@ -41,10 +44,6 @@ def init_db():
     conn.close()
 
 def get_db():
-    """
-    Отдаёт соединение с БД на время обработки запроса.
-    FastAPI сам закроет его после завершения.
-    """
     conn = sqlite3.connect('conferences.db', check_same_thread=False)
     conn.row_factory = sqlite3.Row
     try:

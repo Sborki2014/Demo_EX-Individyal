@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Конференции.РФ{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="nav-container">
+            <a href="/" class="logo">Конференции<span>.РФ</span></a>
+            <ul class="nav-links">
+                {% if request.session.get("user_id") %}
+                    <li><a href="/requests">Мои заявки</a></li>
+                    <li><a href="/create_request">Новая заявка</a></li>
+                    {% if request.session.get("is_admin") %}
+                        <li><a href="/admin">Админ-панель</a></li>
+                    {% endif %}
+                    <li><a href="/logout" class="btn-logout">Выйти</a></li>
+                {% else %}
+                    <li><a href="/login">Вход</a></li>
+                    <li><a href="/register">Регистрация</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2027 Конференции.РФ — бронирование помещений для Всероссийских конференций</p>
+    </footer>
+</body>
+</html>

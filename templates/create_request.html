@@ -1,27 +1,43 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Новая заявка</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <header><a href="/requests">Мои заявки</a> | <a href="/logout">Выйти</a></header>
-    <main>
-        <h1>Создание заявки</h1>
-        <form method="post" action="/create_request">
-            <!-- Текстовое поле для названия помещения -->
-            <input type="text" name="room" placeholder="Название помещения" data-testid="req-room" required>
-            <!-- Поле для даты -->
-            <input type="text" name="date" placeholder="Дата начала (ДД.ММ.ГГГГ)" data-testid="req-date" required>
-            <!-- Выбор способа оплаты -->
-            <select name="payment" data-testid="req-payment">
+{% extends "base.html" %}
+
+{% block title %}Новая заявка — Конференции.РФ{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <h1>Создание заявки</h1>
+    <p class="subtitle">Забронируйте помещение для проведения конференции</p>
+
+    {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/create_request" class="card-form">
+        <div class="form-group">
+            <label for="req-room">Помещение</label>
+            <input type="text" id="req-room" name="room"
+                   placeholder="Например: Аудитория №301"
+                   data-testid="req-room" required>
+        </div>
+
+        <div class="form-group">
+            <label for="req-date">Дата начала конференции</label>
+            <input type="text" id="req-date" name="date"
+                   placeholder="ДД.ММ.ГГГГ"
+                   data-testid="req-date" required>
+        </div>
+
+        <div class="form-group">
+            <label for="req-payment">Способ оплаты</label>
+            <select id="req-payment" name="payment" data-testid="req-payment" required>
+                <option value="">— Выберите способ —</option>
                 <option value="очное">Очное посещение</option>
-                <option value="СБП">Перевод по СБП</option>
+                <option value="СБП">Перевод по системе СБП</option>
             </select>
-            <button type="submit" data-testid="req-submit">Отправить</button>
-        </form>
-    </main>
-</body>
-</html>
+        </div>
+
+        <button type="submit" class="btn btn-primary" data-testid="req-submit">
+            Отправить заявку
+        </button>
+    </form>
+</section>
+{% endblock %}
